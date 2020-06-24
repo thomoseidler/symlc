@@ -7,16 +7,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.integrate as spi
 
-#TODO Make a super class for ensembles.
-
-##     https://stackoverflow.com/questions/49765174/solving-a-first-order-system-of-odes-using-sympy-expressions-and-scipy-solver
-
-#TODO Linearization and Lyapunov stuff
-#TODO Jacobian
-#TODO Implement LieDerivative from notebook
-#TODO Make a function that returns callables for slow_mf and LieDeriv so that
-# plotting can be done in another module
-
 class dynsys():
 	"""
 	Dynamical systems class.
@@ -119,7 +109,7 @@ class dynsys():
 		Returns:
 			:List(sympy.Equations)
 		"""
-		var, fun = self.variables()	#They are already matching and can be used for substitution.
+		var, fun = self.variables()
 		dsys = []
 		substitutes = []
 		for i in zip(var,fun):
@@ -144,7 +134,7 @@ class dynsys():
 		Returns:
 			:List(sympy.Equations)
 		"""
-		var, fun = self.variables()	#They are already matching and can be used for substitution.
+		var, fun = self.variables()
 		dsys = []
 		dyn_var = []
 		idx = 0
@@ -162,30 +152,19 @@ class dynsys():
 
 
 	def make_integrable(self, p):
-		dynsys, var = self.integrable_dynsys(p)	#TODO Somehow this must have a t-dependency for the integrator
-		#var.append('t')
-		#def eq(x, t):
-		#	dydt = sp.lambdify(var, dynsys)#[sp.lambdify(var, i) for i in dynsys]
-		#	return dydt
+		dynsys, var = self.integrable_dynsys(p)
 		eq = sp.lambdify(var, dynsys)#eq
 		def f(x, t):
 			return eq(*x)
 		return f
-#		dynsys, var = self.integrable_dynsys(p)
-#		def eq(y, t):
-#			s = zip(var,y)
-#			#[expr.subs(s) for expr in dynsys]
-#			dydt = []
-#			for i in range(len(dynsys)):
-#				dydt.append(dynsys[i].subs(s))
-#				s = zip(var,y)			#TODO For some reason, s needs to be defined newly all the time, will be overwritten otherwise
-#			return dydt
-#		return eq
 
 
-	def diff_dynsys(self,k):		# k is order of derivation
+	def diff_dynsys(self,k):
 		"""
 		Compute derivatives of the dynamical system and substitute with ODEs.
+
+		Parameters:
+			:int k: order of derivative
 
 		Returns:
 			:Two dimensional list(equations)
@@ -236,7 +215,7 @@ class dynsys():
 
 		Return sympy.plotting.plot.backend instance.
 		"""
-		var, fun = self.variables()	#They are already matching and can be used for substitution.
+		var, fun = self.variables()
 		substitutes = zip(fun,var)
 		expr = self.slow_mf().subs(substitutes)
 		expr2 = expr.subs(params).simplify()
@@ -336,7 +315,7 @@ class dynsys():
 		var, fun = self.variables()
 		substitutes = zip(fun,var)
 		fn = self.slow_mf().lhs.subs(params)
-		f = sp.lambdify(['x1_0','x2_0','x3_0'], fn.subs(substitutes)) #TODO geht das irgendwie systematischer?
+		f = sp.lambdify(['x1_0','x2_0','x3_0'], fn.subs(substitutes))
 		fig, ax = plot_implicit(f, bbox=bbox)
 
 		f2 = self.make_integrable(params)
@@ -350,40 +329,8 @@ class dynsys():
 		plt.show()
 
 
-# TODO
-# 	def grid_sample_slow_mf(self, ranges, samples, threshold, substitutes):
-# 		"""
-# 		On a grid defined by ranges, check for all points (defined via
-# 		sampling_interval),
-# 		if the slow manifold equation has a result smalles than threshhold.
-#
-# 		:param ranges: List of tuples. Define range to sample in.
-# 		:param samples: List of number of samples to take over each interval,
-# 		                length has to match that of ranges.
-# 		:param threshold: Float. Gives a threshold for marking points on slow
-# 		                  manifold.
-# 		"""
-# 		axes = []
-# 		for i, rng in enumerate(ranges):
-# 			axes.append(np.linspace(*rng, samples[i]))
-# 		grid = np.meshgrid(*axes)
-# 		var, fun = self.variables()
-# 		for i, v in enumerate(var):
-# 			if v not in list(substitutes.keys()):
-# 				substitutes[fun[i]] = v
-# 			else:
-#  				substitutes[fun[i]] = substitutes[v]
-# 		slow_mf_eq = self.slow_mf().subs(substitutes)
-# 		print(substitutes)
-# #		print(slow_mf_eq)
-# 		eq = sp.lambdify(slow_mf_eq.free_symbols, slow_mf_eq.lhs)
-# 		return grid, eq(*grid)<threshold	#TODO Can slow_mf_eq be <0?
-# 		#TODO Maybe it is better if a grid is returned which only keeps values where eq(*grid)<threshold==true
-# 		#TODO Test!
-
 
 def make_callable(expression):
-	#TODO Works only for expressions that do not contain any functions of time!
 	variables = sorted(expression.free_symbols, key = lambda symbol: symbol.name)
 	print(variables)
 	f = sp.lambdify(variables, expression)
