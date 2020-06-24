@@ -8,29 +8,42 @@ import numpy as np
 import scipy.integrate as spi
 
 class dynsys():
-	"""
-	Dynamical systems class.
+    """Dynamical systems class.
+    
+    	Dynsys class provides easy to initialize symbolic representations of
+    	dynamical systems.
 
-	Dynsys class provides easy to initialize symbolic representations of
-	dynamical systems.
-	"""
+    Parameters
+    ----------
+
+    Returns
+    -------
+
+    """
 
 	def __init__(self, equations, n_osc = 1):
 		"""
 		Constructor.
 
-		Members:
-			:List n: Degrees of each ODE in the system.
-			:int n_eq: Number of differential equations (should be number of
+		Members
+		-------
+		n: list
+			Degrees of each ODE in the system.
+		n_eq: int
+			Number of differential equations (should be number of
 			           independent variables).
-			:int n_params: Number of parameters.
-			:sympy.Symbol t: Symbolic variable for the time.
+		n_params: int
+			Number of parameters.
+		t: sympy.Symbol
+			Symbolic variable for the time.
 
-		Params:
-			:param self: The object pointer.
-			:List(string) equations: List of strings containing all differential
+		Parameters
+		----------
+		equations: List(string)
+			List of strings containing all differential
 			                         equations.
-			:int n_osc: (Optional) Number of oscillators (if an ensemble is
+		n_osc: int
+			(Not fully implemented) Number of oscillators (if an ensemble is
 			                       involved). Defaults to 1.
 		"""
 		self.n_eq = len(equations)
@@ -42,14 +55,15 @@ class dynsys():
 		self.n_osc = n_osc
 
 	def degs(self):
-		"""
-		Find the degrees of the differential equations.
-
+		"""Find the degrees of the differential equations.
+		
 		Find highest occurrence of xi. It is assumed that no system will have a degree higher than 9.
 		Degree -1 means that no variable (x) occurs in the equation.
 
-		Returns:
-			:List(int) degrees:
+		Returns
+		-------
+		degrees: list(int)
+
 		"""
 		degs = []
 		for idx, eq in enumerate(self.equations):
@@ -62,17 +76,18 @@ class dynsys():
 
 
 	def variables(self):
-		"""
-		Find all variables (or derivatives) from system.
-
+		"""Find all variables (or derivatives) from system.
+		
 		Also return a set of equally named functions. They will be used
 		internally for symbolic differentiation and stuff.
 
-		Returns:
-			:tuple containing:
+		Returns
+		-------
 
-			- List(string) variables
-			- List(sympy.Functions) functions
+		    tuple containing:
+		    - List(string) variables
+		    - List(sympy.Functions) functions
+
 		"""
 		variables = []
 		functions = []
@@ -87,11 +102,12 @@ class dynsys():
 
 
 	def params(self):
-		"""
-		Find all parameters from system.
+		"""Find all parameters from system.
 
-		Returns:
-			:List(string) params:
+		Returns
+		-------
+		    params: list(string)
+
 		"""
 		params = []
 		for idx, eq in enumerate(self.equations):
@@ -103,11 +119,12 @@ class dynsys():
 		return params
 
 	def ode2dynsys(self):
-		"""
-		Make the ODEs to a larger system of first order ODEs.
+		"""Make the ODEs to a larger system of first order ODEs.
 
-		Returns:
-			:List(sympy.Equations)
+		Returns
+		-------
+		    List(sympy.Equations)
+
 		"""
 		var, fun = self.variables()
 		dsys = []
@@ -128,11 +145,18 @@ class dynsys():
 
 
 	def integrable_dynsys(self, p):
-		"""
-		Return a list of first order equations for simulations.
+		"""Return a list of first order equations for simulations.
 
-		Returns:
-			:List(sympy.Equations)
+		Parameters
+		----------
+		p : dict
+			(key, val) pairs for the parameters
+		    
+
+		Returns
+		-------
+	    list(sympy.Equations), sympy.Variables
+
 		"""
 		var, fun = self.variables()
 		dsys = []
@@ -152,22 +176,39 @@ class dynsys():
 
 
 	def make_integrable(self, p):
+		"""
+		Make equations usable with `scipy.odeint`.
+
+		Parameters
+		----------
+		p : dict
+			(key, val) pairs with  parameter values.
+		    
+
+		Returns
+		-------
+		f: function
+		"""
 		dynsys, var = self.integrable_dynsys(p)
-		eq = sp.lambdify(var, dynsys)#eq
+		eq = sp.lambdify(var, dynsys)
 		def f(x, t):
 			return eq(*x)
 		return f
 
 
 	def diff_dynsys(self,k):
-		"""
-		Compute derivatives of the dynamical system and substitute with ODEs.
+		"""Compute derivatives of the dynamical system and substitute with ODEs.
 
-		Parameters:
-			:int k: order of derivative
+		Parameters
+		----------
+		k : int
+			Order of the derivative
+		    
 
-		Returns:
-			:Two dimensional list(equations)
+		Returns
+		-------
+		two dimensional list(equations)
+
 		"""
 		dynsys = self.ode2dynsys()
 		diff = []
@@ -191,11 +232,13 @@ class dynsys():
 
 
 	def slow_mf(self):
-		"""
-		Compute slow manifold equation.
+		"""Compute slow manifold equation.
 
-		Returns:
-			:sympy.Equation
+		Returns
+		-------
+		
+		    sympy.Equation
+
 		"""
 		dynsys = self.ode2dynsys()
 		l = len(dynsys)
@@ -206,14 +249,24 @@ class dynsys():
 
 
 	def plot_slow_mf(self,params,save=False,filename="slow_mf.png", show=True):
-		"""
-		Plot the slow manifold.
+		"""Plot the slow manifold.
 
-		:param params: Dict. Numerical values for parameters.
-		:param save: Boolean. Save file? Defaults to False.
-		:param filename: String. Name of the file if saved.
+		Parameters
+		----------
+		params : dict
+		    Numerical values for parameters.
+		save : bool
+		    Save file? Defaults to False.
+		filename : str
+		    Name of the file if saved.
+		    (Default value = "slow_mf.png")
+		show : bool
+			Show the plot.
+		    (Default value = True)
 
-		Return sympy.plotting.plot.backend instance.
+		Returns
+		-------
+		sympy.plotting.plot.backend instance.
 		"""
 		var, fun = self.variables()
 		substitutes = zip(fun,var)
@@ -231,14 +284,22 @@ class dynsys():
 
 
 	def plot_slow_mf_and_simulation(self, params, save=False, filename="slow_mf.png", numerics={"time":[0,1,100], "initial_condition":[1,1]}):
-		"""
-		Plot the slow manifold and a simulation of the system for specified range and initial conditions.
+		"""Plot the slow manifold and a simulation of the system for specified range and initial conditions.
 
-		:param params: Dict. Numerical values for parameters.
-		:param save: Boolean. Save file? Defaults to False.
-		:param filename: String. Name of the file if saved.
-	        :param numerics: dict. Contains timerange and initial conditions for simulation.
+		Parameters
+		----------
+		params : dict
+		    Numerical values for parameters.
+		save : bool
+		    Save file? Defaults to False.
+		filename : str
+			Name of the file if saved. (Default value = "slow_mf.png")
+		numerics : dict
+		    Contains timerange and initial conditions for simulation. (Default value = {"time":[0)
 
+		Returns
+		-------
+		`sympy.plotting.plot.backend` instance
 		"""
 
 		#Check if numerics dict is correct
@@ -262,22 +323,34 @@ class dynsys():
 
 
 	def plot_slow_mf_and_simulation_3d(self, params, save=False, filename="slow_mf.png", numerics={"time":[0,1,100], "initial_condition":[1,1,1]}, bbox=(-2.5, 2.5)):
-		""" 		
-		Plot the slow manifold of a three dimensional system and a simulation of the system for specified range and initial conditions.
+		"""Plot the slow manifold of a three dimensional system and a simulation of the system for specified range and initial conditions.
 
-		:param params: Dict. Numerical values for parameters.
-		:param save: Boolean. Save file? Defaults to False.
-		:param filename: String. Name of the file if saved.
-	        :param numerics: dict. Contains timerange and initial conditions for simulation.
- 
+		Parameters
+		----------
+		params : dict
+		    Numerical values for parameters.
+		save : bool
+		    Save file? Defaults to False.
+		filename : str
+		    Name of the file if saved. (Default value = "slow_mf.png")
+		numerics : dict
+		    Contains timerange and initial conditions for simulation. (Default value = {"time":[0)
+
 		"""
 		from mpl_toolkits.mplot3d import Axes3D
 
 		def plot_implicit(fn, bbox=(-2.5,2.5)):
-			""" 
-			create a plot of an implicit function 
+			"""create a plot of an implicit function
 			fn  ...implicit function (plot where fn==0)
 			bbox ..the x,y,and z limits of plotted interval
+
+			Parameters
+			----------
+			fn : function
+			    
+			bbox : tuple
+				Axis range
+			    (Default value = (-2.52.5)
 			"""
 			xmin, xmax, ymin, ymax, zmin, zmax = bbox*3
 			fig = plt.figure()
@@ -309,7 +382,6 @@ class dynsys():
 			ax.set_xlim3d(xmin,xmax)
 			ax.set_ylim3d(ymin,ymax)
 
-			#plt.show()
 			return fig, ax
 
 		var, fun = self.variables()
@@ -331,6 +403,18 @@ class dynsys():
 
 
 def make_callable(expression):
+    """
+	Make a sympy expression callable with numeric values.
+	
+    Parameters
+    ----------
+    expression : `sympy.Expression`
+        
+
+    Returns
+    -------
+	callable
+    """
 	variables = sorted(expression.free_symbols, key = lambda symbol: symbol.name)
 	print(variables)
 	f = sp.lambdify(variables, expression)
