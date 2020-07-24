@@ -4,7 +4,7 @@ Module that provides symbolic computations for (limit cycle) oscillators
 import sympy as sp
 from sympy.parsing.sympy_parser import (
     parse_expr,
-)  # Parse string expressions of the input equations
+)
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.integrate as spi
@@ -406,6 +406,77 @@ class dynsys:
         if save == True:
             fig.savefig(filename)
         plt.show()
+
+
+
+	def lie_derivative(self):
+		"""
+		Compute the Lie derivative of the given equation along the given vector field. 
+		In practice this will be used for the Lie derivative of the slow manifold equation.
+		"""
+		#TODO Das nochmal verstehen...
+		equation = self.slow_mf()
+		dynsys = self.ode2dynsys()
+		var = self.variables()
+		variables = [i for i in var[1]] #TODO So richtig sauber sind das und die nächsten Zeilen nicht.
+		vector_field = [i for i in var[1]]
+		del variables[-1]
+		del vector_field[0]
+
+		lie_deriv = 0
+
+		for var, vec in zip(variables, vector_field):
+			lie_deriv += sp.diff(equation.lhs, var) * vec
+		lie_deriv = lie_deriv.subs(vector_field[-1], dynsys[-1].rhs)
+		lie_deriv.simplify()
+
+		return lie_deriv
+
+
+
+	def decompose_lie_derivative(self):
+		"""
+		Compute the Lie derivative of the given equation along the given vector field. 
+		In practice this will be used for the Lie derivative of the slow manifold equation.
+    
+		:param equation: sympy.equation the left hand side of which the Lie derivative is to be taken of.
+		:param dynsys: Dynamical system equations to be substituted.
+		:param variables: Independent variables to calculate partial derivatives.
+		:param vector_field: Vector field along which the Lie derivative is to be taken.
+		"""
+
+		#TODO Das nochmal verstehen...
+		#TODO Not really a method yet but should work as a standalone function
+
+		equation = self.slow_mf()
+
+#		variables = [i for i in var[1]]
+#		vector_field = [i for i in var[1]]
+		#print(var)
+		#print(var[1])
+#		del variables[-1]
+#		print(variables)
+#		del vector_field[0]
+#		print(vector_field[-1])
+
+		#TODO Check shape of vector field
+#		lie_deriv = 0
+		Phi = sp.Symbol(r'\Phi')
+		Psi = sp.Symbol(r'\Psi')
+		lie_deriv = self.lie_derivative()
+		#TODO Eigentlich sind nur die nächsten vier Zeilen lie-deriv und sollten funktional vom Rest getrennt werden
+#		for var, vec in zip(variables, vector_field):
+#			lie_deriv += sp.diff(equation.lhs, var) * vec
+#		lie_deriv = lie_deriv.subs(vector_field[-1], dynsys[-1].rhs) #TODO Substitue dynamical equations!
+#		lie_deriv.simplify()
+#		print(lie_deriv)
+		k, Psi = sp.div(lie_deriv, equation.lhs)
+		#lie_deriv = q*Phi + r
+		#r_plot = r.subs({'p1_1':6,'p1_2':1,variables[0]:'x', variables[1]: 'y'})
+		#print(r_plot)
+		#plot = sp.plotting.plot_implicit(r_plot,show=True)
+		return lie_deriv, k, Psi
+
 
 
 def make_callable(expression):
