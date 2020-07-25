@@ -414,11 +414,10 @@ class dynsys:
 		Compute the Lie derivative of the given equation along the given vector field. 
 		In practice this will be used for the Lie derivative of the slow manifold equation.
 		"""
-		#TODO Das nochmal verstehen...
 		equation = self.slow_mf()
 		dynsys = self.ode2dynsys()
 		var = self.variables()
-		variables = [i for i in var[1]] #TODO So richtig sauber sind das und die nächsten Zeilen nicht.
+		variables = [i for i in var[1]]
 		vector_field = [i for i in var[1]]
 		del variables[-1]
 		del vector_field[0]
@@ -436,45 +435,15 @@ class dynsys:
 
 	def decompose_lie_derivative(self):
 		"""
-		Compute the Lie derivative of the given equation along the given vector field. 
-		In practice this will be used for the Lie derivative of the slow manifold equation.
-    
-		:param equation: sympy.equation the left hand side of which the Lie derivative is to be taken of.
-		:param dynsys: Dynamical system equations to be substituted.
-		:param variables: Independent variables to calculate partial derivatives.
-		:param vector_field: Vector field along which the Lie derivative is to be taken.
+		Decompose the Lie derivative into slow manifold, co-factor and additional rest.
 		"""
-
-		#TODO Das nochmal verstehen...
-		#TODO Not really a method yet but should work as a standalone function
 
 		equation = self.slow_mf()
 
-#		variables = [i for i in var[1]]
-#		vector_field = [i for i in var[1]]
-		#print(var)
-		#print(var[1])
-#		del variables[-1]
-#		print(variables)
-#		del vector_field[0]
-#		print(vector_field[-1])
-
-		#TODO Check shape of vector field
-#		lie_deriv = 0
 		Phi = sp.Symbol(r'\Phi')
 		Psi = sp.Symbol(r'\Psi')
 		lie_deriv = self.lie_derivative()
-		#TODO Eigentlich sind nur die nächsten vier Zeilen lie-deriv und sollten funktional vom Rest getrennt werden
-#		for var, vec in zip(variables, vector_field):
-#			lie_deriv += sp.diff(equation.lhs, var) * vec
-#		lie_deriv = lie_deriv.subs(vector_field[-1], dynsys[-1].rhs) #TODO Substitue dynamical equations!
-#		lie_deriv.simplify()
-#		print(lie_deriv)
 		k, Psi = sp.div(lie_deriv, equation.lhs)
-		#lie_deriv = q*Phi + r
-		#r_plot = r.subs({'p1_1':6,'p1_2':1,variables[0]:'x', variables[1]: 'y'})
-		#print(r_plot)
-		#plot = sp.plotting.plot_implicit(r_plot,show=True)
 		return lie_deriv, k, Psi
 
 
