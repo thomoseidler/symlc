@@ -1,1 +1,2 @@
-from symlc import *
+from .symlc import dynsys
+import symlc
